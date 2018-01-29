@@ -1,10 +1,10 @@
-var express               = require('express'),
-    app                   = express(),
-    bodyParser            = require('body-parser'),
-    mongoose              = require('mongoose'),
-    passport              = require('passport'),
-    LocalStrategy         = require('passport-local'),
-    passportLocalMongoose = require('passport-local-mongoose');
+var express = require('express'),
+  app = express(),
+  bodyParser = require('body-parser'),
+  mongoose = require('mongoose'),
+  passport = require('passport'),
+  LocalStrategy = require('passport-local'),
+  passportLocalMongoose = require('passport-local-mongoose');
 
 var User = require('./models/user');
 
@@ -32,12 +32,36 @@ app.disable('x-powered-by');
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.urlencoded({extended: true}));
 
+// ===================
+// ROUTES
+// ===================
+
 app.get('/', function (req, res) {
   res.render('home');
 });
 
 app.get('/secret', function (req, res) {
   res.render('secret');
+});
+
+// Auth Routes
+
+// Show signup form
+app.get('/register', function (req, res) {
+  res.render('register');
+});
+
+// Handling user signup
+app.post('/register', function (req, res) {
+  User.register(new User({username: req.body.username}), req.body.password, function (err, user) {
+    if (err) {
+      console.log(err);
+      return res.render('register');
+    }
+    passport.authenticate('local')(req, res, function () {
+      res.redirect('/secret');
+    });
+  });
 });
 
 app.listen(3000, function () {
